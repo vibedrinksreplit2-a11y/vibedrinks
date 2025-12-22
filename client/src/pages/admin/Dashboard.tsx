@@ -932,10 +932,15 @@ function FinanceiroTab() {
                     <YAxis tick={{ fill: '#888', fontSize: 12 }} tickFormatter={(v) => `R$${v}`} />
                     <Tooltip 
                       formatter={(value: number) => [formatCurrency(value), 'Receita']}
-                      contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }}
+                      contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#fff' }}
                       labelStyle={{ color: '#fff' }}
                     />
-                    <Bar dataKey="revenue" fill="#FFD700" radius={[4, 4, 0, 0]} />
+                    <Bar 
+                      dataKey="revenue" 
+                      fill="#FFD700" 
+                      radius={[4, 4, 0, 0]}
+                      label={{ position: 'top', fill: '#FFD700', fontSize: 11, fontWeight: 'bold' }}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -962,8 +967,8 @@ function FinanceiroTab() {
                       cy="50%"
                       outerRadius={80}
                       dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      labelLine={false}
+                      label={({ name, percent, value }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      labelLine={true}
                     >
                       {paymentChartData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
@@ -971,7 +976,8 @@ function FinanceiroTab() {
                     </Pie>
                     <Tooltip 
                       formatter={(value: number) => [formatCurrency(value), 'Total']}
-                      contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }}
+                      contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#fff' }}
+                      labelStyle={{ color: '#fff' }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -999,8 +1005,8 @@ function FinanceiroTab() {
                       cy="50%"
                       outerRadius={80}
                       dataKey="value"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      labelLine={false}
+                      label={({ name, percent, value }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      labelLine={true}
                     >
                       {orderTypeChartData.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
@@ -1008,7 +1014,8 @@ function FinanceiroTab() {
                     </Pie>
                     <Tooltip 
                       formatter={(value: number) => [formatCurrency(value), 'Total']}
-                      contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333' }}
+                      contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', color: '#fff' }}
+                      labelStyle={{ color: '#fff' }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
