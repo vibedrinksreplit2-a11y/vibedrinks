@@ -664,20 +664,57 @@ function FinanceiroTab() {
     }))
     .sort((a, b) => b.value - a.value);
 
-  const revenueByDay = filteredOrders.reduce((acc, order) => {
-    const date = new Date(order.createdAt!).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-    acc[date] = (acc[date] || 0) + Number(order.total);
+  // Determine granularity based on filter
+  const getChartGranularity = (): 'hour' | 'day' => {
+    if (dateFilter === 'today') return 'hour';
+    const daysDiff = (filterEnd.getTime() - filterStart.getTime()) / (1000 * 60 * 60 * 24);
+    return daysDiff <= 7 ? 'day' : 'day';
+  };
+
+  const granularity = getChartGranularity();
+  
+  const revenueByPeriod = filteredOrders.reduce((acc, order) => {
+    const date = new Date(order.createdAt!);
+    let key: string;
+    
+    if (granularity === 'hour') {
+      key = `${String(date.getHours()).padStart(2, '0')}:00`;
+    } else {
+      key = date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    }
+    
+    acc[key] = (acc[key] || 0) + Number(order.total);
     return acc;
   }, {} as Record<string, number>);
 
-  const revenueChartData = Object.entries(revenueByDay)
-    .map(([date, revenue]) => ({ date, revenue: Number(revenue.toFixed(2)) }))
+  const revenueChartData = Object.entries(revenueByPeriod)
+    .map(([period, revenue]) => ({ 
+      period, 
+      revenue: Number(revenue.toFixed(2))
+    }))
     .sort((a, b) => {
-      const [dayA, monthA] = a.date.split('/').map(Number);
-      const [dayB, monthB] = b.date.split('/').map(Number);
+      if (granularity === 'hour') {
+        return parseInt(a.period) - parseInt(b.period);
+      }
+      const [dayA, monthA] = a.period.split('/').map(Number);
+      const [dayB, monthB] = b.period.split('/').map(Number);
       if (monthA !== monthB) return monthA - monthB;
       return dayA - dayB;
     });
+
+  const getChartTitle = (): string => {
+    if (dateFilter === 'today') return 'Receita por Hora';
+    if (dateFilter === 'week') return 'Receita por Dia (7 dias)';
+    if (dateFilter === 'month') return 'Receita por Dia (30 dias)';
+    const daysDiff = Math.ceil((filterEnd.getTime() - filterStart.getTime()) / (1000 * 60 * 60 * 24));
+    return `Receita por Dia (${daysDiff} dias)`;
+  };
+
+  const chartTitle = getChartTitle();
+  const periodLabel = filterStart.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) === 
+                      filterEnd.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) 
+    ? `${filterStart.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })} - ${filterEnd.toLocaleDateString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+    : `${filterStart.toLocaleDateString('pt-BR')} - ${filterEnd.toLocaleDateString('pt-BR')}`;
 
   const productSales = orderItems
     .reduce((acc, item) => {
@@ -881,14 +918,17 @@ function FinanceiroTab() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card data-testid="card-revenue-chart">
           <CardHeader>
-            <CardTitle className="text-lg">Receita por Dia</CardTitle>
+            <div className="flex flex-col gap-1">
+              <CardTitle className="text-lg">{chartTitle}</CardTitle>
+              <p className="text-xs text-muted-foreground">{periodLabel}</p>
+            </div>
           </CardHeader>
           <CardContent>
             {revenueChartData.length > 0 ? (
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={revenueChartData}>
-                    <XAxis dataKey="date" tick={{ fill: '#888', fontSize: 12 }} />
+                    <XAxis dataKey="period" tick={{ fill: '#888', fontSize: 12 }} />
                     <YAxis tick={{ fill: '#888', fontSize: 12 }} tickFormatter={(v) => `R$${v}`} />
                     <Tooltip 
                       formatter={(value: number) => [formatCurrency(value), 'Receita']}
