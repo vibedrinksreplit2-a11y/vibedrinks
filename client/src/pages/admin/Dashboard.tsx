@@ -537,6 +537,8 @@ function FinanceiroTab() {
   const [dateFilter, setDateFilter] = useState<'today' | 'week' | 'month' | 'custom'>('month');
   const [customStartDate, setCustomStartDate] = useState<string>('');
   const [customEndDate, setCustomEndDate] = useState<string>('');
+  const [customStartTime, setCustomStartTime] = useState<string>('00:00');
+  const [customEndTime, setCustomEndTime] = useState<string>('23:59');
   
   const { data: orders = [] } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
@@ -553,31 +555,37 @@ function FinanceiroTab() {
   const deliveredOrders = orders.filter(o => o.status === 'delivered');
   
   const getDateRange = (): { start: Date; end: Date } => {
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
+    let end = new Date();
     let start = new Date();
     
     switch (dateFilter) {
       case 'today':
         start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
         break;
       case 'week':
         start.setDate(start.getDate() - 7);
         start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
         break;
       case 'month':
         start.setMonth(start.getMonth() - 1);
         start.setHours(0, 0, 0, 0);
+        end.setHours(23, 59, 59, 999);
         break;
       case 'custom':
         if (customStartDate) {
           start = new Date(customStartDate);
-          start.setHours(0, 0, 0, 0);
+          const [startHour, startMin] = customStartTime.split(':');
+          start.setHours(parseInt(startHour), parseInt(startMin), 0, 0);
         }
         if (customEndDate) {
-          const customEnd = new Date(customEndDate);
-          customEnd.setHours(23, 59, 59, 999);
-          return { start, end: customEnd };
+          end = new Date(customEndDate);
+          const [endHour, endMin] = customEndTime.split(':');
+          end.setHours(parseInt(endHour), parseInt(endMin), 59, 999);
+        } else {
+          const [endHour, endMin] = customEndTime.split(':');
+          end.setHours(parseInt(endHour), parseInt(endMin), 59, 999);
         }
         break;
     }
@@ -604,17 +612,21 @@ function FinanceiroTab() {
     enabled: filteredOrders.length > 0,
   });
 
-  const totalRevenue = filteredOrders.reduce((sum, o) => sum + Number(o.total), 0);
-  const totalDeliveryFees = filteredOrders.reduce((sum, o) => sum + Number(o.deliveryFee), 0);
-  const totalSubtotal = filteredOrders.reduce((sum, o) => sum + Number(o.subtotal), 0);
-  const totalDiscount = filteredOrders.reduce((sum, o) => sum + Number(o.discount || 0), 0);
+  const totalRevenue = filteredOrders.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+  const totalDeliveryFees = filteredOrders.reduce((sum, o) => sum + (Number(o.deliveryFee) || 0), 0);
+  const totalSubtotal = filteredOrders.reduce((sum, o) => sum + (Number(o.subtotal) || 0), 0);
+  const totalDiscount = filteredOrders.reduce((sum, o) => sum + (Number(o.discount) || 0), 0);
   const avgTicket = filteredOrders.length > 0 ? totalRevenue / filteredOrders.length : 0;
 
   const paymentBreakdown = filteredOrders.reduce((acc, order) => {
     const method = order.paymentMethod as PaymentMethod;
-    acc[method] = (acc[method] || 0) + Number(order.total);
+    acc[method] = (acc[method] || 0) + (Number(order.total) || 0);
     return acc;
   }, {} as Record<PaymentMethod, number>);
+  
+  const cashPayments = filteredOrders.filter(o => o.paymentMethod === 'cash');
+  const totalCashReceived = cashPayments.reduce((sum, o) => sum + (Number(o.total) || 0), 0);
+  const cashOrdersCount = cashPayments.length;
 
   const paymentChartData = Object.entries(paymentBreakdown).map(([method, value]) => ({
     name: PAYMENT_METHOD_LABELS[method as PaymentMethod] || method,
@@ -782,33 +794,58 @@ function FinanceiroTab() {
             </div>
             {dateFilter === 'custom' && (
               <div className="flex flex-wrap items-center gap-2">
-                <Input
-                  type="date"
-                  value={customStartDate}
-                  onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="w-40"
-                  data-testid="input-start-date"
-                />
+                <div className="flex items-center gap-1">
+                  <Input
+                    type="date"
+                    value={customStartDate}
+                    onChange={(e) => setCustomStartDate(e.target.value)}
+                    className="w-40"
+                    data-testid="input-start-date"
+                  />
+                  <Input
+                    type="time"
+                    value={customStartTime}
+                    onChange={(e) => setCustomStartTime(e.target.value)}
+                    className="w-32"
+                    data-testid="input-start-time"
+                  />
+                </div>
                 <span className="text-muted-foreground">ate</span>
-                <Input
-                  type="date"
-                  value={customEndDate}
-                  onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="w-40"
-                  data-testid="input-end-date"
-                />
+                <div className="flex items-center gap-1">
+                  <Input
+                    type="date"
+                    value={customEndDate}
+                    onChange={(e) => setCustomEndDate(e.target.value)}
+                    className="w-40"
+                    data-testid="input-end-date"
+                  />
+                  <Input
+                    type="time"
+                    value={customEndTime}
+                    onChange={(e) => setCustomEndTime(e.target.value)}
+                    className="w-32"
+                    data-testid="input-end-time"
+                  />
+                </div>
               </div>
             )}
           </div>
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
         <Card data-testid="card-total-revenue">
           <CardContent className="p-6">
             <div className="text-sm text-muted-foreground mb-1">Receita Total</div>
             <div className="text-2xl font-bold text-primary">{formatCurrency(totalRevenue)}</div>
             <div className="text-xs text-muted-foreground mt-1">{filteredOrders.length} pedidos</div>
+          </CardContent>
+        </Card>
+        <Card data-testid="card-cash-received">
+          <CardContent className="p-6">
+            <div className="text-sm text-muted-foreground mb-1">Dinheiro Recolhido</div>
+            <div className="text-2xl font-bold text-green-500">{formatCurrency(totalCashReceived)}</div>
+            <div className="text-xs text-muted-foreground mt-1">{cashOrdersCount} pedidos em dinheiro</div>
           </CardContent>
         </Card>
         <Card data-testid="card-prepared-products">
