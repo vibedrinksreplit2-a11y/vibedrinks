@@ -42,6 +42,7 @@ const STATUS_CONFIG: Record<OrderStatus, { icon: typeof Package; color: string }
   preparing: { icon: ChefHat, color: 'bg-orange-500/20 text-orange-400 border-orange-500/30' },
   ready: { icon: Package, color: 'bg-green-500/20 text-green-400 border-green-500/30' },
   dispatched: { icon: Truck, color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
+  arrived: { icon: Truck, color: 'bg-purple-600/20 text-purple-500 border-purple-600/30' },
   delivered: { icon: CheckCircle, color: 'bg-green-600/20 text-green-500 border-green-600/30' },
   cancelled: { icon: XCircle, color: 'bg-red-500/20 text-red-400 border-red-500/30' },
 };
