@@ -109,12 +109,12 @@ export default function Checkout() {
 
   const isOpen = isBusinessHoursOpen();
 
-  // Redirect to login if not authenticated or no address (wait for hydration)
+  // Redirect to login if not authenticated (wait for hydration)
   useEffect(() => {
-    if (isHydrated && (!isAuthenticated || !address)) {
+    if (isHydrated && !isAuthenticated) {
       setLocation('/login?redirect=/checkout');
     }
-  }, [isAuthenticated, address, setLocation, isHydrated]);
+  }, [isAuthenticated, setLocation, isHydrated]);
 
   // Redirect to home if cart is empty
   useEffect(() => {
@@ -124,13 +124,16 @@ export default function Checkout() {
   }, [items.length, setLocation]);
 
   // Show loading while checking auth
-  if (!isAuthenticated || !address || items.length === 0) {
+  if (!isAuthenticated || items.length === 0) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
+  
+  // Use saved address or require it to be filled
+  const finalAddress = address || { street: '', number: '', complement: '', neighborhood: '', city: 'Sao Paulo', state: 'SP', zipCode: '', notes: '' };
 
   return (
     <div className="min-h-screen bg-background py-8 px-4">
@@ -174,15 +177,21 @@ export default function Checkout() {
               <CardContent>
                 <div className="bg-secondary/50 p-4 rounded-lg border border-primary/10">
                   <p className="font-medium text-foreground">{user?.name}</p>
-                  <p className="text-muted-foreground text-sm mt-1">
-                    {address.street}, {address.number}
-                    {address.complement && ` - ${address.complement}`}
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    {address.neighborhood} - Sao Paulo, SP
-                  </p>
-                  {address.notes && (
-                    <p className="text-yellow text-sm mt-2">Obs: {address.notes}</p>
+                  {address ? (
+                    <>
+                      <p className="text-muted-foreground text-sm mt-1">
+                        {address.street}, {address.number}
+                        {address.complement && ` - ${address.complement}`}
+                      </p>
+                      <p className="text-muted-foreground text-sm">
+                        {address.neighborhood} - Sao Paulo, SP
+                      </p>
+                      {address.notes && (
+                        <p className="text-yellow text-sm mt-2">Obs: {address.notes}</p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-muted-foreground text-sm mt-1">Endereço não preenchido. Preencha seu bairro abaixo.</p>
                   )}
                 </div>
                 
@@ -198,7 +207,7 @@ export default function Checkout() {
                       className="bg-secondary border-primary/30"
                       data-testid="select-neighborhood-checkout"
                     >
-                      <SelectValue placeholder={address.neighborhood || "Selecione seu bairro"} />
+                      <SelectValue placeholder={address?.neighborhood || "Selecione seu bairro"} />
                     </SelectTrigger>
                     <SelectContent>
                       {groupedNeighborhoods.map(({ zone, zoneInfo, neighborhoods }) => (
