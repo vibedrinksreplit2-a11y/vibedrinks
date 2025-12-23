@@ -62,9 +62,9 @@ const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
   cancelled: []
 };
 
-// Counter orders for prepared categories (doses, caipirinhas, batidas, drinks especiais, copao)
-// Flow: pending -> accepted -> preparing -> ready -> delivered (NO dispatched - that's delivery only!)
-const COUNTER_PREPARED_TRANSITIONS: Record<string, string[]> = {
+// Counter/PDV orders - ALL start with 'accepted' and go through kitchen
+// Flow: accepted -> preparing -> ready -> delivered (NO dispatched - that's delivery only!)
+const COUNTER_TRANSITIONS: Record<string, string[]> = {
   pending: ['accepted', 'cancelled'],
   accepted: ['preparing', 'cancelled'],
   preparing: ['ready', 'cancelled'],
@@ -73,47 +73,21 @@ const COUNTER_PREPARED_TRANSITIONS: Record<string, string[]> = {
   cancelled: []
 };
 
-// Counter orders for common items can skip KDE flow entirely
-// Flow: pending -> ready -> delivered (NO preparing/accepted)
-const COUNTER_COMMON_TRANSITIONS: Record<string, string[]> = {
-  pending: ['ready', 'cancelled'],
-  ready: ['delivered', 'cancelled'],
-  delivered: [],
-  cancelled: []
-};
-
 async function isValidStatusTransition(
   currentStatus: string,
   newStatus: string,
   orderType?: string,
-  orderId?: string
+  _orderId?: string
 ): Promise<{ valid: boolean; transitions: string[] }> {
   let transitions: Record<string, string[]>;
   
-  if (orderType === 'counter' && orderId) {
-    // Check if counter order has prepared category items
-    const items = await storage.getOrderItems(orderId);
-    const allCategories = await storage.getCategories();
-    const preparedCatNames = ['doses', 'caipirinhas', 'batidas', 'drinks especiais', 'copao'];
-    const preparedCatIds = new Set(
-      allCategories
-        .filter(c => preparedCatNames.some(name => c.name.toLowerCase().includes(name.toLowerCase())))
-        .map(c => c.id)
-    );
-    
-    let hasPreparedItems = false;
-    for (const item of items) {
-      const product = await storage.getProduct(item.productId);
-      if (product && (product.isPrepared || preparedCatIds.has(product.categoryId))) {
-        hasPreparedItems = true;
-        break;
-      }
-    }
-    
-    transitions = hasPreparedItems ? COUNTER_PREPARED_TRANSITIONS : COUNTER_COMMON_TRANSITIONS;
-  } else if (orderType === 'counter') {
-    transitions = COUNTER_COMMON_TRANSITIONS;
+  // All orders follow same initial path: created -> accepted -> preparing -> ready
+  // Difference only in final step: delivery uses dispatched, counter/PDV uses delivered
+  if (orderType === 'counter') {
+    // PDV/Counter orders: accepted -> preparing -> ready -> delivered
+    transitions = COUNTER_TRANSITIONS;
   } else {
+    // Delivery orders: accepted -> preparing -> ready -> dispatched -> delivered
     transitions = VALID_STATUS_TRANSITIONS;
   }
   
