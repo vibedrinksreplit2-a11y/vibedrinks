@@ -206,14 +206,10 @@ export default function PDV() {
       return;
     }
 
-    // Determine initial status based on whether cart has prepared items
-    const hasPreparedItems = cart.some(item => isProductPrepared(item.product));
-    const initialStatus = hasPreparedItems ? 'accepted' : 'ready';
-
     const orderData = {
       userId: user?.id,
       orderType: 'counter',
-      status: initialStatus,
+      status: 'accepted',
       subtotal: subtotal.toFixed(2),
       deliveryFee: '0.00',
       discount: discountValue.toFixed(2),
