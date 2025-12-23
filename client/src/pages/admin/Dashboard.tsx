@@ -967,7 +967,7 @@ function FinanceiroTab() {
                       cy="50%"
                       outerRadius={80}
                       dataKey="value"
-                      label={({ name, percent, value }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent, value }) => `${name}\n${(percent * 100).toFixed(0)}% - ${formatCurrency(value)}`}
                       labelLine={true}
                     >
                       {paymentChartData.map((_, index) => (
@@ -1005,7 +1005,7 @@ function FinanceiroTab() {
                       cy="50%"
                       outerRadius={80}
                       dataKey="value"
-                      label={({ name, percent, value }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent, value }) => `${name}\n${(percent * 100).toFixed(0)}% - ${formatCurrency(value)}`}
                       labelLine={true}
                     >
                       {orderTypeChartData.map((_, index) => (
