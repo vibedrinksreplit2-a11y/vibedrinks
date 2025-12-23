@@ -61,21 +61,62 @@ const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
   cancelled: []
 };
 
-const COUNTER_ORDER_TRANSITIONS: Record<string, string[]> = {
+// Counter orders for prepared categories need KDE flow
+const COUNTER_PREPARED_TRANSITIONS: Record<string, string[]> = {
   pending: ['accepted', 'cancelled'],
   accepted: ['preparing', 'cancelled'],
   preparing: ['ready', 'cancelled'],
   ready: ['dispatched', 'cancelled'],
   dispatched: ['delivered', 'cancelled'],
-  arrived: ['delivered', 'cancelled'],
   delivered: [],
   cancelled: []
 };
 
-function isValidStatusTransition(currentStatus: string, newStatus: string, orderType?: string): boolean {
-  const transitions = orderType === 'counter' ? COUNTER_ORDER_TRANSITIONS : VALID_STATUS_TRANSITIONS;
-  const allowed = transitions[currentStatus];
-  return allowed ? allowed.includes(newStatus) : false;
+// Counter orders for common items can skip KDE flow
+const COUNTER_COMMON_TRANSITIONS: Record<string, string[]> = {
+  pending: ['ready', 'cancelled'],
+  ready: ['delivered', 'cancelled'],
+  delivered: [],
+  cancelled: []
+};
+
+async function isValidStatusTransition(
+  currentStatus: string,
+  newStatus: string,
+  orderType?: string,
+  orderId?: string
+): Promise<{ valid: boolean; transitions: string[] }> {
+  let transitions: Record<string, string[]>;
+  
+  if (orderType === 'counter' && orderId) {
+    // Check if counter order has prepared category items
+    const items = await storage.getOrderItems(orderId);
+    const allCategories = await storage.getCategories();
+    const preparedCatNames = ['doses', 'caipirinhas', 'batidas', 'drinks especiais', 'copao'];
+    const preparedCatIds = new Set(
+      allCategories
+        .filter(c => preparedCatNames.some(name => c.name.toLowerCase().includes(name.toLowerCase())))
+        .map(c => c.id)
+    );
+    
+    let hasPreparedItems = false;
+    for (const item of items) {
+      const product = await storage.getProduct(item.productId);
+      if (product && (product.isPrepared || preparedCatIds.has(product.categoryId))) {
+        hasPreparedItems = true;
+        break;
+      }
+    }
+    
+    transitions = hasPreparedItems ? COUNTER_PREPARED_TRANSITIONS : COUNTER_COMMON_TRANSITIONS;
+  } else if (orderType === 'counter') {
+    transitions = COUNTER_COMMON_TRANSITIONS;
+  } else {
+    transitions = VALID_STATUS_TRANSITIONS;
+  }
+  
+  const allowed = transitions[currentStatus] || [];
+  return { valid: allowed.includes(newStatus), transitions: allowed };
 }
 
 export async function registerRoutes(
@@ -979,12 +1020,12 @@ export async function registerRoutes(
     const order = await storage.getOrder(req.params.id);
     if (!order) return res.status(404).json({ error: "Order not found" });
 
-    const transitions = order.orderType === 'counter' ? COUNTER_ORDER_TRANSITIONS : VALID_STATUS_TRANSITIONS;
-    if (!isValidStatusTransition(order.status, status, order.orderType)) {
+    const transitionResult = await isValidStatusTransition(order.status, status, order.orderType, req.params.id);
+    if (!transitionResult.valid) {
       return res.status(400).json({ 
         error: `Transicao invalida: ${order.status} -> ${status}`,
         currentStatus: order.status,
-        allowedTransitions: transitions[order.status] || []
+        allowedTransitions: transitionResult.transitions
       });
     }
 
@@ -1085,6 +1126,13 @@ export async function registerRoutes(
     if (order.status !== 'ready') {
       return res.status(400).json({ 
         error: `Pedido deve estar com status 'pronto' para atribuir motoboy. Status atual: ${order.status}` 
+      });
+    }
+
+    // Only delivery orders require motoboy assignment
+    if (order.orderType !== 'delivery') {
+      return res.status(400).json({ 
+        error: `Apenas pedidos de delivery precisam de atribuição de motoboy. Este pedido é do tipo: ${order.orderType}` 
       });
     }
 
