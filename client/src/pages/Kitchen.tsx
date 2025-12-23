@@ -245,19 +245,8 @@ export default function Kitchen() {
       const isDelivery = order.orderType === 'delivery';
       if (isDelivery) {
         return (
-          <div className="flex flex-col gap-2">
-            <div className="text-xs text-amber-400 bg-amber-500/10 p-2 rounded border border-amber-500/20">
-              Aguardando atribuicao de motoboy na guia Delivery
-            </div>
-            <Button
-              className="w-full bg-amber-600 text-white py-3 text-sm"
-              onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'dispatched' })}
-              disabled={updateStatusMutation.isPending}
-              data-testid={`button-dispatch-${order.id}`}
-            >
-              <Truck className="h-4 w-4 mr-2" />
-              Marcar como Despachado
-            </Button>
+          <div className="text-xs text-amber-400 bg-amber-500/10 p-2 rounded border border-amber-500/20">
+            Aguardando atribuicao de motoboy na guia Delivery
           </div>
         );
       }
@@ -331,18 +320,15 @@ export default function Kitchen() {
                           key={product.id}
                           className="flex items-center gap-2 p-2 rounded hover:bg-muted cursor-pointer"
                           onClick={() => {
-                            setSelectedIngredients(prev => {
-                              const existing = prev.find(ing => ing.productId === product.id);
-                              if (existing) {
-                                return prev.filter(ing => ing.productId !== product.id);
-                              }
-                              return [...prev, { productId: product.id, quantity: 1, shouldDeductStock: true }];
-                            });
+                            setSelectedIngredients(prev => [
+                              ...prev,
+                              { productId: product.id, quantity: 1, shouldDeductStock: true }
+                            ]);
                           }}
                           data-testid={`item-ingredient-${product.id}`}
                         >
                           <Checkbox
-                            checked={selectedIngredients.some(ing => ing.productId === product.id)}
+                            checked={false}
                             className="mr-2"
                           />
                           <span className="text-sm flex-1">{product.name}</span>
