@@ -74,13 +74,10 @@ export function ProductImageUploader({
     setIsUploading(true);
 
     try {
-      console.log("Local file selected:", file.name, file.size);
       const compressedFile = await compressImage(file);
       
-      console.log("Uploading local file:", compressedFile.name, compressedFile.size);
       const { path, publicUrl } = await uploadImage(compressedFile, folder);
       
-      console.log("Upload successful - path:", path, "publicUrl:", publicUrl);
       
       // We always set the preview to the publicUrl returned by the server
       setPreviewUrl(publicUrl);
@@ -93,7 +90,6 @@ export function ProductImageUploader({
         description: "Imagem enviada com sucesso!",
       });
     } catch (error) {
-      console.error("Upload error:", error);
       toast({
         title: "Erro no upload",
         description: error instanceof Error ? error.message : "Falha ao enviar imagem. Tente novamente.",
@@ -135,7 +131,6 @@ export function ProductImageUploader({
         });
       }
     } catch (error) {
-      console.error("Search error:", error);
       toast({
         title: "Erro na pesquisa",
         description: "Falha ao pesquisar imagens. Tente novamente.",
@@ -149,16 +144,12 @@ export function ProductImageUploader({
   const handleSelectSearchResult = useCallback(async (result: SearchResult) => {
     setIsUploading(true);
     try {
-      console.log("Downloading image:", result.imageUrl);
       const imageFile = await fetchImageAsFile(result.imageUrl, "product.jpg");
       
-      console.log("Compressing image:", imageFile.name, imageFile.size);
       const compressedFile = await compressImage(imageFile);
       
-      console.log("Uploading file:", compressedFile.name, compressedFile.size);
       const { path, publicUrl } = await uploadImage(compressedFile, folder);
       
-      console.log("Upload successful - path:", path, "publicUrl:", publicUrl);
       
       // We always set the preview to the publicUrl returned by the server
       setPreviewUrl(publicUrl);
@@ -173,7 +164,6 @@ export function ProductImageUploader({
         description: "Imagem enviada com sucesso!",
       });
     } catch (error) {
-      console.error("Upload error:", error);
       toast({
         title: "Erro no upload",
         description: error instanceof Error ? error.message : "Falha ao enviar imagem. Tente novamente.",

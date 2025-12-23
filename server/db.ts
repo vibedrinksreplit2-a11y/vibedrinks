@@ -14,7 +14,6 @@ if (!databaseUrl) {
   );
 }
 
-console.log("Database connection initialized");
 
 export const pool = new Pool({ 
   connectionString: databaseUrl,
@@ -27,7 +26,6 @@ export const pool = new Pool({
 });
 
 pool.on('error', (err) => {
-  console.error('Unexpected database pool error:', err.message);
 });
 
 export const db = drizzle(pool, { schema });

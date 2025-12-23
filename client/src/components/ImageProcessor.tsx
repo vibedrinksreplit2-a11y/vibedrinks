@@ -105,7 +105,6 @@ export function ImageProcessor() {
         description: `${totalImages} imagens processadas. Economia total: ${formatBytes(savings)}`,
       });
     } catch (error) {
-      console.error('Error processing images:', error);
       toast({
         title: 'Erro',
         description: 'Ocorreu um erro ao processar as imagens.',

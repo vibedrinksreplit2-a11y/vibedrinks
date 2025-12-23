@@ -97,7 +97,6 @@ export async function deleteImage(path: string): Promise<void> {
   
   const userId = getUserId();
   if (!userId) {
-    console.log('User not authenticated, skipping delete');
     return;
   }
 
@@ -113,9 +112,7 @@ export async function deleteImage(path: string): Promise<void> {
 
     if (!response.ok) {
       const error = await response.json();
-      console.error('Failed to delete image:', error.error);
     }
   } catch (error) {
-    console.error('Error deleting image:', error);
   }
 }

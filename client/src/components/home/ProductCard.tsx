@@ -60,7 +60,6 @@ export function ProductCard({ product, categoryName }: ProductCardProps) {
               alt={product.name}
               className="w-full h-full object-cover transition-all duration-500 group-hover:brightness-110"
               onError={(e) => {
-                console.error('Image failed to load:', ensureImageUrl(product.imageUrl));
                 e.currentTarget.style.display = 'none';
               }}
             />

@@ -153,7 +153,6 @@ export function ExpandableOrderCard({
             map[item.id] = await res.json();
           }
         } catch (err) {
-          console.error('Error loading ingredients:', err);
         }
       }
       setIngredientsMap(map);

@@ -65,14 +65,12 @@ export async function compressImage(file: File): Promise<File> {
           QUALITY
         );
       } catch (error) {
-        console.error('Error compressing image:', error);
         resolve(file);
       }
     };
 
     img.onerror = () => {
       URL.revokeObjectURL(img.src);
-      console.error('Error loading image');
       resolve(file);
     };
 

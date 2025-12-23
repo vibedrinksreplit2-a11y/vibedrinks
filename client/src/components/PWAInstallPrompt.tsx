@@ -90,7 +90,6 @@ export function PWAInstallPrompt() {
         localStorage.setItem('pwa-installed', 'true');
       }
     } catch (error) {
-      console.error('Error installing PWA:', error);
     }
 
     setDeferredPrompt(null);

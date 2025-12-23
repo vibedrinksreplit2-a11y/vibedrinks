@@ -81,7 +81,6 @@ export function useOrderUpdates(options: UseOrderUpdatesOptions = {}) {
         }
       };
     } catch (error) {
-      console.error('Failed to connect to SSE:', error);
     }
   }, []);
 

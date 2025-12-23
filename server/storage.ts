@@ -809,11 +809,9 @@ const SALT_ROUNDS = 10;
 export async function seedDatabase() {
   const existingUsers = await db.select().from(users);
   if (existingUsers.length > 0) {
-    console.log("Database already seeded, skipping...");
     return;
   }
 
-  console.log("Seeding database with initial data...");
 
   const adminId = randomUUID();
   const kitchenId = randomUUID();
@@ -895,6 +893,5 @@ export async function seedDatabase() {
     isOpen: true,
   });
 
-  console.log("Database seeded successfully!");
 }
 

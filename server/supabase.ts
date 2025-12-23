@@ -14,7 +14,6 @@ if (supabaseUrl && supabaseServiceKey) {
     }
   });
 } else {
-  console.warn('Supabase credentials not configured. Storage features will be disabled.');
 }
 
 export { supabaseAdmin };
@@ -83,7 +82,6 @@ export async function deleteFile(path: string): Promise<void> {
     return;
   }
   if (!supabaseAdmin) {
-    console.warn('Supabase is not configured. Cannot delete file.');
     return;
   }
   
@@ -92,7 +90,6 @@ export async function deleteFile(path: string): Promise<void> {
     .remove([path]);
 
   if (error) {
-    console.error(`Failed to delete file: ${error.message}`);
   }
 }
 

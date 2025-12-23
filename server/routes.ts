@@ -155,7 +155,6 @@ export async function registerRoutes(
       await seedDatabase();
       res.json({ success: true, message: "Usuarios padroes criados: Admin (939393), Cozinha (939393), Balcao (939393)" });
     } catch (error) {
-      console.error("Error seeding users:", error);
       res.status(500).json({ error: "Erro ao criar usuarios padroes" });
     }
   });
@@ -398,7 +397,6 @@ export async function registerRoutes(
       
       res.json({ success: true, message: "Solicitacao enviada. O administrador entrara em contato via WhatsApp." });
     } catch (error: any) {
-      console.error("Error creating password reset request:", error);
       res.status(500).json({ error: "Erro ao solicitar recuperacao de senha" });
     }
   });
@@ -409,7 +407,6 @@ export async function registerRoutes(
       const requests = await storage.getPendingPasswordResetRequests();
       res.json(requests);
     } catch (error: any) {
-      console.error("Error fetching password reset requests:", error);
       res.status(500).json({ error: "Erro ao buscar solicitacoes" });
     }
   });
@@ -448,7 +445,6 @@ export async function registerRoutes(
       
       res.json({ success: true, message: "Senha redefinida com sucesso" });
     } catch (error: any) {
-      console.error("Error completing password reset:", error);
       res.status(500).json({ error: "Erro ao redefinir senha" });
     }
   });
@@ -479,7 +475,6 @@ export async function registerRoutes(
       const { password: _, ...safeUser } = user;
       res.json({ success: true, user: safeUser });
     } catch (error: any) {
-      console.error("Error changing password:", error);
       res.status(500).json({ error: "Erro ao alterar senha" });
     }
   });
@@ -572,7 +567,6 @@ export async function registerRoutes(
       
       res.status(204).send();
     } catch (error: any) {
-      console.error("Error deleting category:", error);
       
       // Handle database constraint violations
       if (error.code === '23503') {
@@ -624,7 +618,6 @@ export async function registerRoutes(
       res.setHeader('Content-Disposition', 'attachment; filename=produtos.csv');
       res.send(csvContent);
     } catch (error: any) {
-      console.error("Error exporting CSV:", error);
       res.status(500).json({ error: "Erro ao exportar CSV: " + error.message });
     }
   });
@@ -800,7 +793,6 @@ export async function registerRoutes(
         message: `${imported} produtos importados com sucesso${errors.length > 0 ? `, ${errors.length} erros` : ''}`
       });
     } catch (error: any) {
-      console.error("Error importing CSV:", error);
       res.status(500).json({ error: "Erro ao processar CSV: " + error.message });
     }
   });
@@ -919,7 +911,6 @@ export async function registerRoutes(
       
       res.status(201).json(order);
     } catch (error: any) {
-      console.error("Error creating order:", error);
       if (error.code === '23503') {
         res.status(400).json({ error: "Dados invalidos. Faca login novamente e cadastre um endereco." });
       } else {
@@ -961,7 +952,6 @@ export async function registerRoutes(
       
       res.json(ingredient);
     } catch (error: any) {
-      console.error("Error adding preparation ingredient:", error);
       res.status(500).json({ error: "Erro ao adicionar ingrediente" });
     }
   });
@@ -978,7 +968,6 @@ export async function registerRoutes(
       );
       res.json(enriched);
     } catch (error: any) {
-      console.error("Error fetching ingredients:", error);
       res.status(500).json({ error: "Erro ao buscar ingredientes" });
     }
   });
@@ -1312,7 +1301,6 @@ export async function registerRoutes(
       const categories = await storage.getCategories();
       res.json(categories);
     } catch (error) {
-      console.error("Error reordering categories:", error);
       res.status(500).json({ error: "Failed to reorder categories" });
     }
   });
@@ -1333,7 +1321,6 @@ export async function registerRoutes(
       const products = await storage.getProducts();
       res.json(products);
     } catch (error) {
-      console.error("Error reordering products:", error);
       res.status(500).json({ error: "Failed to reorder products" });
     }
   });
@@ -1381,7 +1368,6 @@ export async function registerRoutes(
       
       res.send(Buffer.from(buffer));
     } catch (error: any) {
-      console.error("Proxy error:", error);
       res.status(500).json({ error: "Failed to proxy image" });
     }
   });
@@ -1401,10 +1387,8 @@ export async function registerRoutes(
         req.file.mimetype,
         folder
       );
-      console.log("File uploaded successfully:", result);
       res.json(result);
     } catch (error) {
-      console.error("Error uploading file:", error);
       return res.status(500).json({ error: `Failed to upload file: ${error instanceof Error ? error.message : 'Unknown error'}` });
     }
   });
@@ -1431,7 +1415,6 @@ export async function registerRoutes(
       await deleteFile(path);
       res.json({ success: true });
     } catch (error) {
-      console.error("Error deleting file:", error);
       return res.status(500).json({ error: "Failed to delete file" });
     }
   });
@@ -1476,7 +1459,6 @@ export async function registerRoutes(
 
       res.json({ images });
     } catch (error) {
-      console.error("Error searching images:", error);
       res.status(500).json({ error: "Failed to search images" });
     }
   });
@@ -1517,7 +1499,6 @@ export async function registerRoutes(
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        console.warn(`Image URL returned ${response.status}: ${imageUrl}`);
         throw new Error(`Failed to download image: ${response.status} ${response.statusText}`);
       }
 
@@ -1534,7 +1515,6 @@ export async function registerRoutes(
       res.setHeader('Cache-Control', 'no-cache');
       res.send(buffer);
     } catch (error) {
-      console.error("Error downloading image:", error);
       res.status(500).json({ error: "Failed to download image. The server may have blocked the request." });
     }
   });
@@ -1579,10 +1559,8 @@ export async function registerRoutes(
         throw deleteError;
       }
 
-      console.log(`Cleaned ${filesToDelete.length} files from products folder`);
       res.json({ success: true, deleted: filesToDelete.length });
     } catch (error) {
-      console.error("Error cleaning products folder:", error);
       res.status(500).json({ error: "Failed to clean products folder" });
     }
   });
@@ -1598,7 +1576,6 @@ export async function registerRoutes(
       if (!product) return res.status(404).json({ error: "Product not found" });
       res.json(product);
     } catch (error) {
-      console.error("Error updating product image:", error);
       res.status(500).json({ error: "Internal server error" });
     }
   });
@@ -1659,7 +1636,6 @@ export async function registerRoutes(
         ordersCount: deliveredOrdersCount
       });
     } catch (error) {
-      console.error("Error generating prepared products sales report:", error);
       res.status(500).json({ error: "Failed to generate prepared products sales report" });
     }
   });
@@ -1746,7 +1722,6 @@ export async function registerRoutes(
       
       res.json({ summary, products: stockProducts });
     } catch (error) {
-      console.error("Error generating stock report:", error);
       res.status(500).json({ error: "Failed to generate stock report" });
     }
   });
@@ -1806,7 +1781,6 @@ export async function registerRoutes(
       
       res.json({ summary, products: lowStockProducts });
     } catch (error) {
-      console.error("Error getting low stock suggestions:", error);
       res.status(500).json({ error: "Failed to get low stock suggestions" });
     }
   });
@@ -1871,7 +1845,6 @@ export async function registerRoutes(
       
       res.json({ summary, products: shoppingListProducts });
     } catch (error) {
-      console.error("Error generating shopping list:", error);
       res.status(500).json({ error: "Failed to generate shopping list" });
     }
   });
@@ -1895,7 +1868,6 @@ export async function registerRoutes(
       const zone = await storage.createDeliveryZone(req.body);
       res.status(201).json(zone);
     } catch (error: any) {
-      console.error("Error creating delivery zone:", error);
       if (error.code === '23505') {
         return res.status(400).json({ error: "Codigo de zona ja existe" });
       }
@@ -1909,7 +1881,6 @@ export async function registerRoutes(
       if (!zone) return res.status(404).json({ error: "Zone not found" });
       res.json(zone);
     } catch (error: any) {
-      console.error("Error updating delivery zone:", error);
       if (error.code === '23505') {
         return res.status(400).json({ error: "Codigo de zona ja existe" });
       }
@@ -1930,7 +1901,6 @@ export async function registerRoutes(
       if (!deleted) return res.status(404).json({ error: "Zone not found" });
       res.status(204).send();
     } catch (error: any) {
-      console.error("Error deleting delivery zone:", error);
       res.status(500).json({ error: "Erro ao excluir zona" });
     }
   });
@@ -1964,7 +1934,6 @@ export async function registerRoutes(
       const neighborhood = await storage.createNeighborhood(req.body);
       res.status(201).json(neighborhood);
     } catch (error: any) {
-      console.error("Error creating neighborhood:", error);
       res.status(500).json({ error: "Erro ao criar bairro" });
     }
   });
@@ -1982,7 +1951,6 @@ export async function registerRoutes(
       if (!neighborhood) return res.status(404).json({ error: "Neighborhood not found" });
       res.json(neighborhood);
     } catch (error: any) {
-      console.error("Error updating neighborhood:", error);
       res.status(500).json({ error: "Erro ao atualizar bairro" });
     }
   });
@@ -1993,7 +1961,6 @@ export async function registerRoutes(
       if (!deleted) return res.status(404).json({ error: "Neighborhood not found" });
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting neighborhood:", error);
       res.status(500).json({ error: "Erro ao excluir bairro" });
     }
   });
@@ -2037,7 +2004,6 @@ export async function registerRoutes(
 
       res.json(updatedOrder);
     } catch (error) {
-      console.error("Error updating delivery fee:", error);
       res.status(500).json({ error: "Erro ao atualizar taxa de entrega" });
     }
   });
@@ -2104,7 +2070,6 @@ export async function registerRoutes(
         });
       }
     } catch (error) {
-      console.error("Error seeding BATIDAS:", error);
       res.status(500).json({ error: "Erro ao criar categoria BATIDAS" });
     }
   });
@@ -2161,7 +2126,6 @@ export async function registerRoutes(
       const items = await storage.getShoppingListItems(list.id);
       res.status(201).json({ ...list, items });
     } catch (error) {
-      console.error("Error creating shopping list:", error);
       res.status(500).json({ error: "Erro ao criar lista de compras" });
     }
   });
@@ -2184,7 +2148,6 @@ export async function registerRoutes(
       
       res.json(item);
     } catch (error) {
-      console.error("Error marking item purchased:", error);
       res.status(500).json({ error: "Erro ao marcar item" });
     }
   });
@@ -2195,7 +2158,6 @@ export async function registerRoutes(
       if (!list) return res.status(404).json({ error: "Lista nao encontrada" });
       res.json(list);
     } catch (error) {
-      console.error("Error completing shopping list:", error);
       res.status(500).json({ error: "Erro ao finalizar lista" });
     }
   });
@@ -2206,7 +2168,6 @@ export async function registerRoutes(
       if (!deleted) return res.status(404).json({ error: "Lista nao encontrada" });
       res.status(204).send();
     } catch (error) {
-      console.error("Error deleting shopping list:", error);
       res.status(500).json({ error: "Erro ao excluir lista" });
     }
   });
@@ -2247,7 +2208,6 @@ export async function registerRoutes(
 
       res.json({ images: allImages, total: allImages.length });
     } catch (error) {
-      console.error("Error listing images:", error);
       res.status(500).json({ error: "Erro ao listar imagens" });
     }
   });
@@ -2333,7 +2293,6 @@ export async function registerRoutes(
         });
       }
     } catch (error) {
-      console.error("Error processing image:", error);
       res.status(500).json({ error: "Erro ao processar imagem" });
     }
   });
@@ -2427,7 +2386,6 @@ export async function registerRoutes(
         results
       });
     } catch (error) {
-      console.error("Error batch processing images:", error);
       res.status(500).json({ error: "Erro ao processar imagens em lote" });
     }
   });

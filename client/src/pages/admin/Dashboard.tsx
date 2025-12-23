@@ -2998,7 +2998,6 @@ function ProdutosTab() {
       });
     },
     onError: (error) => {
-      console.error("Mutation error:", error);
       toast({
         title: "Erro",
         description: "Falha ao atualizar imagem do produto no banco de dados.",

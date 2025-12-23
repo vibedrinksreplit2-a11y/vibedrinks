@@ -23,7 +23,6 @@ export async function searchProductImages(
     const data = await response.json();
     return data.images || [];
   } catch (error) {
-    console.error('Error searching images:', error);
     throw error;
   }
 }
@@ -46,7 +45,6 @@ export async function fetchImageAsFile(imageUrl: string, filename: string): Prom
     const blob = await response.blob();
     return new File([blob], filename, { type: blob.type });
   } catch (error) {
-    console.error('Error fetching image:', error);
     throw error;
   }
 }

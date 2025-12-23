@@ -21,7 +21,6 @@ export function usePushNotifications(options: UsePushNotificationsOptions = {}) 
 
   const requestPermission = useCallback(async (): Promise<boolean> => {
     if (!('Notification' in window)) {
-      console.warn('This browser does not support notifications');
       return false;
     }
 
@@ -30,7 +29,6 @@ export function usePushNotifications(options: UsePushNotificationsOptions = {}) 
       setPermission(result);
       return result === 'granted';
     } catch (error) {
-      console.error('Failed to request notification permission:', error);
       return false;
     }
   }, []);
@@ -65,7 +63,6 @@ export function usePushNotifications(options: UsePushNotificationsOptions = {}) 
 
       return notification;
     } catch (error) {
-      console.error('Failed to show notification:', error);
       return null;
     }
   }, [playSound, soundRepeat, playMultiple, stopAll]);
