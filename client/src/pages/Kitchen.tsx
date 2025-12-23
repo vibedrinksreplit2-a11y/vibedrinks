@@ -124,19 +124,10 @@ export default function Kitchen() {
         return true;
       }
       
-      // Counter orders only show if they have prepared items
-      const preparedCategoryNames = ['doses', 'caipirinhas', 'batidas', 'drinks especiais', 'copao'];
-      const preparedCategoryIds = new Set(
-        categories
-          .filter(c => preparedCategoryNames.some(name => c.name.toLowerCase().includes(name.toLowerCase())))
-          .map(c => c.id)
-      );
-
-      // Check if any item in the order belongs to a prepared category
-      return order.items.some(item => {
-        const product = allProducts.find(p => p.id === item.productId);
-        return product && (product.isPrepared || preparedCategoryIds.has(product.categoryId));
-      });
+      // Counter orders show if they're in active processing states (accepted/preparing/ready)
+      // This includes orders with ONLY prepared items AND orders with mixed or non-prepared items
+      const activeStatuses = ['accepted', 'preparing', 'ready'];
+      return activeStatuses.includes(order.status);
     });
 
   const updateStatusMutation = useMutation({
