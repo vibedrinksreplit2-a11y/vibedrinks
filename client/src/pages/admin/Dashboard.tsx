@@ -410,7 +410,9 @@ function DeliveryTab() {
 
   const { toast } = useToast();
 
-  const orderIds = orders.map(o => o.id).join(',');
+  // Filter only delivery orders
+  const deliveryOrders = orders.filter(order => order.orderType === 'delivery');
+  const orderIds = deliveryOrders.map(o => o.id).join(',');
   
   const { data: orderItems = [] } = useQuery<OrderItem[]>({
     queryKey: ['/api/order-items', 'delivery', orderIds],
@@ -420,10 +422,10 @@ function DeliveryTab() {
       if (!res.ok) return [];
       return res.json();
     },
-    enabled: orders.length > 0,
+    enabled: deliveryOrders.length > 0,
   });
 
-  const ordersWithDetails: OrderWithDetails[] = orders.map(order => {
+  const ordersWithDetails: OrderWithDetails[] = deliveryOrders.map(order => {
     const user = users.find(u => u.id === order.userId);
     const motoboy = order.motoboyId ? motoboys.find(m => m.id === order.motoboyId) : undefined;
     return {
