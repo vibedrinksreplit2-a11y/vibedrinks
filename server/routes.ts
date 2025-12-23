@@ -1031,30 +1031,8 @@ export async function registerRoutes(
       });
     }
 
-    // For counter orders, require preparation ingredients before marking as ready
-    if (order.orderType === 'counter' && status === 'ready') {
-      const items = await storage.getOrderItems(order.id);
-      const allCategories = await storage.getCategories();
-      const preparedCatNames = ['doses', 'caipirinhas', 'batidas', 'drinks especiais', 'copao'];
-      const preparedCatIds = new Set(
-        allCategories.filter(c => preparedCatNames.some(name => c.name.toLowerCase().includes(name.toLowerCase()))).map(c => c.id)
-      );
-      
-      for (const item of items) {
-        const product = await storage.getProduct(item.productId);
-        if (product && (product.isPrepared || preparedCatIds.has(product.categoryId))) {
-          const ingredients = await storage.getPreparationIngredients(item.id);
-          if (ingredients.length === 0) {
-            return res.status(400).json({ 
-              error: `Produto "${item.productName}" requer seleção de ingredientes de preparo antes de marcar como pronto`,
-              requiresIngredients: true,
-              itemId: item.id,
-              productName: item.productName
-            });
-          }
-        }
-      }
-    }
+    // Note: Preparation ingredients are optional - products can be marked as ready without them
+    // This prevents interruption in the order flow
 
     const updates: Partial<typeof order> = { status };
     const now = new Date();
