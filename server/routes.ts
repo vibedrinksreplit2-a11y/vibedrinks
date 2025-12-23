@@ -50,6 +50,7 @@ function broadcastOrderUpdate(event: string, data?: any) {
   });
 }
 
+// Delivery orders flow: pending -> accepted -> preparing -> ready -> dispatched -> (arrived optional) -> delivered
 const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
   pending: ['accepted', 'cancelled'],
   accepted: ['preparing', 'cancelled'],
@@ -61,18 +62,19 @@ const VALID_STATUS_TRANSITIONS: Record<string, string[]> = {
   cancelled: []
 };
 
-// Counter orders for prepared categories need KDE flow
+// Counter orders for prepared categories (doses, caipirinhas, batidas, drinks especiais, copao)
+// Flow: pending -> accepted -> preparing -> ready -> delivered (NO dispatched - that's delivery only!)
 const COUNTER_PREPARED_TRANSITIONS: Record<string, string[]> = {
   pending: ['accepted', 'cancelled'],
   accepted: ['preparing', 'cancelled'],
   preparing: ['ready', 'cancelled'],
-  ready: ['dispatched', 'cancelled'],
-  dispatched: ['delivered', 'cancelled'],
+  ready: ['delivered', 'cancelled'],  // Direct to delivered (no dispatched)
   delivered: [],
   cancelled: []
 };
 
-// Counter orders for common items can skip KDE flow
+// Counter orders for common items can skip KDE flow entirely
+// Flow: pending -> ready -> delivered (NO preparing/accepted)
 const COUNTER_COMMON_TRANSITIONS: Record<string, string[]> = {
   pending: ['ready', 'cancelled'],
   ready: ['delivered', 'cancelled'],

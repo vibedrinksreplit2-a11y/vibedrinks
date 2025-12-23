@@ -1286,16 +1286,36 @@ function PDVTab() {
                 
                 <div className="flex flex-wrap gap-2">
                   {order.status === 'pending' && (
-                    <Button 
-                      size="sm"
-                      onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'accepted' })}
-                      data-testid={`button-accept-pdv-${order.id}`}
-                    >
-                      <Check className="w-4 h-4 mr-1" />
-                      Aceitar
-                    </Button>
+                    <>
+                      <Button 
+                        size="sm"
+                        onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'accepted' })}
+                        data-testid={`button-accept-pdv-${order.id}`}
+                      >
+                        <Check className="w-4 h-4 mr-1" />
+                        Aceitar (para Preparar)
+                      </Button>
+                      <Button 
+                        size="sm"
+                        onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'ready' })}
+                        data-testid={`button-ready-pdv-${order.id}`}
+                      >
+                        <Check className="w-4 h-4 mr-1" />
+                        Marcar como Pronto
+                      </Button>
+                    </>
                   )}
-                  {(order.status === 'accepted' || order.status === 'preparing') && (
+                  {order.status === 'accepted' && (
+                    <div className="text-xs text-blue-400 bg-blue-500/10 p-2 rounded border border-blue-500/20">
+                      Pedido aguardando producao na Cozinha
+                    </div>
+                  )}
+                  {order.status === 'preparing' && (
+                    <div className="text-xs text-orange-400 bg-orange-500/10 p-2 rounded border border-orange-500/20">
+                      Pedido em producao na Cozinha
+                    </div>
+                  )}
+                  {order.status === 'ready' && (
                     <Button 
                       size="sm"
                       onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'delivered' })}
