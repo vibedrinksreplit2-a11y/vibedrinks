@@ -222,20 +222,35 @@ export default function Kitchen() {
     }
     if (status === 'ready') {
       const isDelivery = order.orderType === 'delivery';
-      if (!isDelivery) {
+      if (isDelivery) {
         return (
-          <Button
-            className="w-full bg-cyan-600 text-white py-4 text-base font-semibold"
-            onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'delivered' })}
-            disabled={updateStatusMutation.isPending}
-            data-testid={`button-pickup-${order.id}`}
-          >
-            <UserIcon className="h-5 w-5 mr-2" />
-            Cliente Retirou
-          </Button>
+          <div className="flex flex-col gap-2">
+            <div className="text-xs text-amber-400 bg-amber-500/10 p-2 rounded border border-amber-500/20">
+              Aguardando atribuicao de motoboy na guia Delivery
+            </div>
+            <Button
+              className="w-full bg-amber-600 text-white py-3 text-sm"
+              onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'dispatched' })}
+              disabled={updateStatusMutation.isPending}
+              data-testid={`button-dispatch-${order.id}`}
+            >
+              <Truck className="h-4 w-4 mr-2" />
+              Marcar como Despachado
+            </Button>
+          </div>
         );
       }
-      return null;
+      return (
+        <Button
+          className="w-full bg-cyan-600 text-white py-4 text-base font-semibold"
+          onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'delivered' })}
+          disabled={updateStatusMutation.isPending}
+          data-testid={`button-pickup-${order.id}`}
+        >
+          <UserIcon className="h-5 w-5 mr-2" />
+          Cliente Retirou
+        </Button>
+      );
     }
     return null;
   };
