@@ -434,6 +434,7 @@ export class DatabaseStorage implements IStorage {
       notes: insertOrder.notes ?? null,
       customerName: insertOrder.customerName ?? null,
       motoboyId: insertOrder.motoboyId ?? null,
+      salesperson: insertOrder.salesperson ?? null,
     }).returning();
     return order;
   }
