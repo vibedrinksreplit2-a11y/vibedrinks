@@ -636,7 +636,8 @@ function FinanceiroTab() {
     return orderDate >= filterStart && orderDate <= filterEnd;
   });
   
-  const counterOrders = allOrdersInRange.filter(o => o.orderType === 'counter');
+  // Always include counter orders for salesperson breakdown (don't filter by date)
+  const counterOrders = orders.filter(o => o.orderType === 'counter');
 
   const filteredOrderIds = filteredOrders.map(o => o.id).join(',');
   
