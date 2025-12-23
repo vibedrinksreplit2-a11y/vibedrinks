@@ -108,15 +108,32 @@ export default function Kitchen() {
     refetchInterval: isSSEConnected ? 30000 : 5000,
   });
 
-  const ordersWithItems: OrderWithItems[] = orders.map(order => {
-    const user = users.find(u => u.id === order.userId);
-    return {
-      ...order,
-      items: orderItems.filter(item => item.orderId === order.id),
-      userName: user?.name,
-      userWhatsapp: user?.whatsapp,
-    };
-  });
+  const ordersWithItems: OrderWithItems[] = orders
+    .map(order => {
+      const user = users.find(u => u.id === order.userId);
+      return {
+        ...order,
+        items: orderItems.filter(item => item.orderId === order.id),
+        userName: user?.name,
+        userWhatsapp: user?.whatsapp,
+      };
+    })
+    .filter(order => {
+      // Only show orders that need kitchen processing
+      // (have items from prepared categories)
+      const preparedCategoryNames = ['doses', 'caipirinhas', 'batidas', 'drinks especiais', 'copao'];
+      const preparedCategoryIds = new Set(
+        categories
+          .filter(c => preparedCategoryNames.some(name => c.name.toLowerCase().includes(name.toLowerCase())))
+          .map(c => c.id)
+      );
+
+      // Check if any item in the order belongs to a prepared category
+      return order.items.some(item => {
+        const product = allProducts.find(p => p.id === item.productId);
+        return product && (product.isPrepared || preparedCategoryIds.has(product.categoryId));
+      });
+    });
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: string; status: OrderStatus }) => {
