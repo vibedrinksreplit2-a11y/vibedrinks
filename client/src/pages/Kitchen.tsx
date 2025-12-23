@@ -119,8 +119,12 @@ export default function Kitchen() {
       };
     })
     .filter(order => {
-      // Only show orders that need kitchen processing
-      // (have items from prepared categories)
+      // Delivery orders always show in kitchen for processing
+      if (order.orderType === 'delivery') {
+        return true;
+      }
+      
+      // Counter orders only show if they have prepared items
       const preparedCategoryNames = ['doses', 'caipirinhas', 'batidas', 'drinks especiais', 'copao'];
       const preparedCategoryIds = new Set(
         categories
