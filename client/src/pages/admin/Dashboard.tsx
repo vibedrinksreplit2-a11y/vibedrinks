@@ -534,11 +534,29 @@ interface PreparedProductsSales {
 }
 
 function FinanceiroTab() {
-  const [dateFilter, setDateFilter] = useState<'today' | 'week' | 'month' | 'custom'>('month');
+  const [dateFilter, setDateFilter] = useState<'today' | 'week' | 'month' | 'custom' | 'specific'>('month');
   const [customStartDate, setCustomStartDate] = useState<string>('');
   const [customEndDate, setCustomEndDate] = useState<string>('');
   const [customStartTime, setCustomStartTime] = useState<string>('00:00');
   const [customEndTime, setCustomEndTime] = useState<string>('23:59');
+  const [specificDate, setSpecificDate] = useState<string>('');
+
+  // Get last 7 days with day names
+  const getLastSevenDays = () => {
+    const days = [];
+    const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      days.push({
+        date,
+        dateString: date.toISOString().split('T')[0],
+        dayName: dayNames[date.getDay()],
+        dayNumber: date.getDate(),
+      });
+    }
+    return days;
+  };
   
   const { data: orders = [] } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
@@ -572,6 +590,17 @@ function FinanceiroTab() {
         start.setMonth(start.getMonth() - 1);
         start.setHours(0, 0, 0, 0);
         end.setHours(23, 59, 59, 999);
+        break;
+      case 'specific':
+        if (specificDate) {
+          start = new Date(specificDate);
+          end = new Date(specificDate);
+          start.setHours(0, 0, 0, 0);
+          end.setHours(23, 59, 59, 999);
+        } else {
+          start.setHours(0, 0, 0, 0);
+          end.setHours(23, 59, 59, 999);
+        }
         break;
       case 'custom':
         if (customStartDate) {
@@ -791,9 +820,34 @@ function FinanceiroTab() {
       </div>
 
       <Card data-testid="card-date-filter">
-        <CardContent className="p-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="text-sm text-muted-foreground">Periodo:</span>
+        <CardContent className="p-4 space-y-4">
+          {/* Últimos 7 dias */}
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">Últimos 7 dias:</p>
+            <div className="flex flex-wrap gap-2">
+              {getLastSevenDays().map((day) => (
+                <Button 
+                  key={day.dateString}
+                  size="sm" 
+                  variant={dateFilter === 'specific' && specificDate === day.dateString ? 'default' : 'outline'}
+                  onClick={() => {
+                    setDateFilter('specific');
+                    setSpecificDate(day.dateString);
+                  }}
+                  data-testid={`button-day-${day.dayName}`}
+                >
+                  <div className="flex flex-col items-center">
+                    <span className="text-xs">{day.dayName}</span>
+                    <span className="text-sm font-semibold">{day.dayNumber}</span>
+                  </div>
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          {/* Filtros rápidos */}
+          <div>
+            <p className="text-sm text-muted-foreground mb-2">Períodos rápidos:</p>
             <div className="flex flex-wrap gap-2">
               <Button 
                 size="sm" 
@@ -829,9 +883,15 @@ function FinanceiroTab() {
                 Personalizado
               </Button>
             </div>
-            {dateFilter === 'custom' && (
+          </div>
+
+          {/* Filtro personalizado - período completo */}
+          {dateFilter === 'custom' && (
+            <div className="space-y-3 pt-2 border-t">
+              <p className="text-sm text-muted-foreground">Selecione o período:</p>
               <div className="flex flex-wrap items-center gap-2">
                 <div className="flex items-center gap-1">
+                  <Label className="text-xs">De:</Label>
                   <Input
                     type="date"
                     value={customStartDate}
@@ -847,8 +907,9 @@ function FinanceiroTab() {
                     data-testid="input-start-time"
                   />
                 </div>
-                <span className="text-muted-foreground">ate</span>
+                <span className="text-muted-foreground">até</span>
                 <div className="flex items-center gap-1">
+                  <Label className="text-xs">Para:</Label>
                   <Input
                     type="date"
                     value={customEndDate}
@@ -865,8 +926,8 @@ function FinanceiroTab() {
                   />
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
