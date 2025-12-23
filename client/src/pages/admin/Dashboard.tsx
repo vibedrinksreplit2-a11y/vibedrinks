@@ -711,10 +711,10 @@ function FinanceiroTab() {
   };
 
   const chartTitle = getChartTitle();
-  const periodLabel = filterStart.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) === 
-                      filterEnd.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) 
-    ? `${filterStart.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })} - ${filterEnd.toLocaleDateString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
-    : `${filterStart.toLocaleDateString('pt-BR')} - ${filterEnd.toLocaleDateString('pt-BR')}`;
+  const isSameDay = filterStart.toLocaleDateString('pt-BR') === filterEnd.toLocaleDateString('pt-BR');
+  const periodLabel = isSameDay
+    ? `${filterStart.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })} | ${filterStart.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} - ${filterEnd.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`
+    : `${filterStart.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })} ${filterStart.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} até ${filterEnd.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' })} ${filterEnd.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 
   const productSales = orderItems
     .reduce((acc, item) => {
