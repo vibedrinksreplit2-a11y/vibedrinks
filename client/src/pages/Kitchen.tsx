@@ -126,8 +126,19 @@ export default function Kitchen() {
       queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       toast({ title: 'Status atualizado!' });
     },
-    onError: () => {
-      toast({ title: 'Erro ao atualizar status', variant: 'destructive' });
+    onError: (error: any) => {
+      const errorMsg = error?.response?.data?.error || 'Erro ao atualizar status';
+      const requiresIngredients = error?.response?.data?.requiresIngredients;
+      
+      if (requiresIngredients) {
+        toast({ 
+          title: 'Ingredientes obrigatórios',
+          description: errorMsg,
+          variant: 'destructive' 
+        });
+      } else {
+        toast({ title: errorMsg, variant: 'destructive' });
+      }
     },
   });
 
