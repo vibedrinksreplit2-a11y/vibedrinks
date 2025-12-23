@@ -926,7 +926,7 @@ export async function registerRoutes(
           if (product) {
             // Get categories to check if product is from a prepared category
             const categories = await storage.getCategories();
-            const preparedCategoryNames = ['copos', 'doses', 'copao', 'drinks', 'caipirinhas', 'drinks especiais', 'batidas'];
+            const preparedCategoryNames = ['doses', 'caipirinhas', 'batidas', 'drinks especiais', 'copao'];
             const preparedCategoryIds = new Set(
               categories.filter(c => preparedCategoryNames.some(name => c.name.toLowerCase().includes(name.toLowerCase()))).map(c => c.id)
             );
@@ -1035,7 +1035,7 @@ export async function registerRoutes(
     if (order.orderType === 'counter' && status === 'ready') {
       const items = await storage.getOrderItems(order.id);
       const allCategories = await storage.getCategories();
-      const preparedCatNames = ['copos', 'doses', 'copao', 'drinks', 'caipirinhas', 'drinks especiais', 'batidas'];
+      const preparedCatNames = ['doses', 'caipirinhas', 'batidas', 'drinks especiais', 'copao'];
       const preparedCatIds = new Set(
         allCategories.filter(c => preparedCatNames.some(name => c.name.toLowerCase().includes(name.toLowerCase()))).map(c => c.id)
       );
@@ -1082,7 +1082,7 @@ export async function registerRoutes(
         // Restore stock for cancelled orders (only for non-prepared products)
         const orderItems = await storage.getOrderItems(req.params.id);
         const allCategories = await storage.getCategories();
-        const preparedCatNames = ['copos', 'doses', 'copao', 'drinks', 'caipirinhas', 'drinks especiais', 'batidas'];
+        const preparedCatNames = ['doses', 'caipirinhas', 'batidas', 'drinks especiais', 'copao'];
         const preparedCatIds = new Set(
           allCategories.filter(c => preparedCatNames.some(name => c.name.toLowerCase().includes(name.toLowerCase()))).map(c => c.id)
         );
