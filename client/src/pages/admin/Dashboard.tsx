@@ -630,6 +630,14 @@ function FinanceiroTab() {
     return orderDate >= filterStart && orderDate <= filterEnd;
   });
 
+  // Get all counter orders in the date range (for salesperson breakdown)
+  const allOrdersInRange = orders.filter(o => {
+    const orderDate = new Date(o.createdAt!);
+    return orderDate >= filterStart && orderDate <= filterEnd;
+  });
+  
+  const counterOrders = allOrdersInRange.filter(o => o.orderType === 'counter');
+
   const filteredOrderIds = filteredOrders.map(o => o.id).join(',');
   
   const { data: orderItems = [] } = useQuery<(typeof import('@shared/schema').orderItems.$inferSelect)[]>({
@@ -675,7 +683,7 @@ function FinanceiroTab() {
     value: Number(value.toFixed(2)),
   }));
 
-  const salespersonBreakdown = filteredOrders.reduce((acc, order) => {
+  const salespersonBreakdown = counterOrders.reduce((acc, order) => {
     if (order.salesperson) {
       const sp = order.salesperson as Salesperson;
       if (!acc[sp]) {
